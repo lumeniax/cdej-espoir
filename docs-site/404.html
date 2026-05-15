@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>404 — CDEJ Espoir TG0154</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .err-wrap {
+      min-height: 70vh;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 3rem 1rem;
+    }
+    .err-code {
+      font-family: var(--font-display);
+      font-size: clamp(4rem, 14vw, 8rem);
+      font-weight: 800;
+      background: linear-gradient(120deg, var(--color-primary), var(--color-accent));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="./">
+        <span class="brand-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </span>
+        <span class="brand-text"><strong>CDEJ Espoir</strong><small>TG0154 · Togo</small></span>
+      </a>
+    </div>
+  </header>
+
+  <main class="err-wrap">
+    <div>
+      <div class="err-code">404</div>
+      <h1>Page introuvable</h1>
+      <p>Cette URL n'existe pas sur le site vitrine du projet.</p>
+      <p style="margin-top:1.5rem">
+        <a class="btn btn-primary" href="./">← Retour à l'accueil</a>
+      </p>
+    </div>
+  </main>
+</body>
+</html>

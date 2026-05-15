@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>CDEJ Espoir TG0154 — Gestion des participants</title>
+  <meta name="description" content="Plateforme web full-stack mobile-first pour la gestion des participants du Centre de Développement de l'Enfant et du Jeune (CDEJ) Espoir, Togo — projet TG0154." />
+  <meta name="theme-color" content="#1a4d2e" />
+  <meta name="robots" content="index, follow" />
+
+  <meta property="og:title" content="CDEJ Espoir TG0154" />
+  <meta property="og:description" content="Gestion des participants CDEJ Espoir Togo — TG0154." />
+  <meta property="og:type" content="website" />
+
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ============== HEADER ============== -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#">
+        <span class="brand-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </span>
+        <span class="brand-text">
+          <strong>CDEJ Espoir</strong>
+          <small>TG0154 · Togo</small>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="#features">Fonctionnalités</a>
+        <a href="#stack">Stack</a>
+        <a href="#install">Installation</a>
+        <a href="#docs">Documentation</a>
+        <a class="btn btn-ghost" href="https://github.com/lumeniax/cdej-espoir" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.55v-1.92c-3.2.7-3.87-1.54-3.87-1.54-.52-1.34-1.27-1.69-1.27-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.76 2.69 1.25 3.35.95.1-.74.4-1.25.72-1.54-2.55-.29-5.24-1.27-5.24-5.66 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.17a10.94 10.94 0 0 1 5.74 0c2.19-1.48 3.15-1.17 3.15-1.17.62 1.58.23 2.75.11 3.04.73.8 1.18 1.82 1.18 3.07 0 4.4-2.69 5.36-5.25 5.65.41.36.78 1.06.78 2.14v3.17c0 .31.21.66.8.55A11.5 11.5 0 0 0 12 .5Z"/></svg>
+          GitHub
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============== HERO ============== -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <div class="hero-text">
+        <span class="pill">Projet TG0154 · Togo 🇹🇬</span>
+        <h1>Gestion des participants du <span class="highlight">CDEJ Espoir</span></h1>
+        <p class="lead">
+          Une plateforme web <strong>full-stack mobile-first</strong>, installable comme application
+          (<strong>PWA</strong>) avec <strong>mode hors-ligne</strong> pour les présences de terrain.
+          Conçue pour le Centre de Développement de l'Enfant et du Jeune Espoir au Togo.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#install">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><polyline points="7 11 12 16 17 11"/><line x1="12" y1="4" x2="12" y2="16"/></svg>
+            Installer localement
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/lumeniax/cdej-espoir" target="_blank" rel="noopener">
+            Voir le code source →
+          </a>
+        </div>
+        <div class="hero-meta">
+          <span>⚡ Express 5 + React 19</span>
+          <span>🔒 JWT + Argon2id</span>
+          <span>📴 Mode hors-ligne</span>
+          <span>📱 PWA installable</span>
+        </div>
+      </div>
+
+      <aside class="hero-card" aria-label="Aperçu du tableau de bord">
+        <div class="card-mock">
+          <div class="mock-topbar">
+            <div class="mock-dot red"></div>
+            <div class="mock-dot yellow"></div>
+            <div class="mock-dot green"></div>
+            <div class="mock-url">cdej-espoir · tableau de bord</div>
+          </div>
+          <div class="mock-body">
+            <div class="mock-stats">
+              <div class="stat"><span class="stat-value">412</span><span class="stat-label">Participants</span></div>
+              <div class="stat"><span class="stat-value">28</span><span class="stat-label">Enseignants</span></div>
+              <div class="stat"><span class="stat-value">94%</span><span class="stat-label">Présence</span></div>
+            </div>
+            <div class="mock-rows">
+              <div class="mock-row"><span class="badge badge-green">TG015400142</span><span>Présence enregistrée</span></div>
+              <div class="mock-row"><span class="badge badge-amber">TG015400078</span><span>IMC à vérifier</span></div>
+              <div class="mock-row"><span class="badge badge-blue">TG015400201</span><span>Bulletin ajouté</span></div>
+              <div class="mock-row"><span class="badge badge-green">TG015400015</span><span>Fiche de paiement</span></div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============== AVERTISSEMENT FULL-STACK ============== -->
+  <section class="notice container">
+    <div class="notice-card">
+      <div class="notice-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div>
+        <h3>Cette page est une vitrine du projet</h3>
+        <p>
+          CDEJ Espoir est une <strong>application full-stack</strong> qui nécessite un serveur Node.js
+          (Express), une base PostgreSQL et de l'authentification JWT par cookies httpOnly.
+          GitHub Pages étant un hébergement <strong>statique</strong>, l'application ne peut pas
+          fonctionner ici. Pour l'utiliser réellement, suivez les
+          <a href="#install">instructions d'installation</a> ci-dessous ou consultez
+          <a href="https://github.com/lumeniax/cdej-espoir/blob/main/DEPLOYMENT.md" target="_blank" rel="noopener">DEPLOYMENT.md</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== FONCTIONNALITÉS ============== -->
+  <section id="features" class="section">
+    <div class="container">
+      <header class="section-head">
+        <h2>15 modules fonctionnels</h2>
+        <p>Un système complet pensé pour le terrain togolais et la réalité des CDEJ.</p>
+      </header>
+
+      <div class="features-grid">
+        <article class="feature">
+          <div class="feature-icon" style="--icon-bg:#dcfce7;--icon-color:#166534">👥</div>
+          <h3>Participants</h3>
+          <p>Gestion complète avec identifiants <code>TG015400XXX</code>, historique et documents attachés.</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon" style="--icon-bg:#dbeafe;--icon-color:#1e40af">🧑‍🏫</div>
+          <h3>Enseignants</h3>
+          <p>Personnel pédagogique, affectations multi-établissements, suivi des charges.</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon" style="--icon-bg:#fef3c7;--icon-color:#92400e">🏫</div>
+          <h3>Établissements</h3>
+          <p>Écoles et structures partenaires, liaisons participants ↔ enseignants.</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon" style="--icon-bg:#fce7f3;--icon-color:#9d174d">📋</div>
+          <h3>Présences</h3>
+          <p>Suivi par session avec <strong>mode hors-ligne complet</strong> (Dexie / IndexedDB).</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon" style="--icon-bg:#fee2e2;--icon-color:#991b1b">❤️</div>
+          <h3>Santé</h3>
+          <p>Suivi médical, vaccins, consultations, IMC avec classification OMS.</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon" style="--icon-bg:#e0e7ff;--icon-color:#3730a3">📚</div>
+          <h3>Scolarité</h3>
+          <p>Bulletins, notes et résultats scolaires par trimestre.</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon" style="--icon-bg:#f3e8ff;--icon-color:#6b21a8">🙏</div>
+          <h3>Spirituel</h3>
+          <p>Suivi de l'engagement spirituel et participation aux activités.</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon" style="--icon-bg:#ccfbf1;--icon-color:#115e59">💰</div>
+          <h3>Finances</h3>
+          <p>Suivi des financements, fiches de paiement, exports comptables.</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon" style="--icon-bg:#ffe4e6;--icon-color:#9f1239">📎</div>
+          <h3>Documents</h3>
+          <p>Gestion des pièces jointes, contrats, autorisations parentales.</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon" style="--icon-bg:#cffafe;--icon-color:#155e75">📊</div>
+          <h3>IMC anthropomètrique</h3>
+          <p>Mesures de taille, poids, et classification OMS automatique.</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon" style="--icon-bg:#fef9c3;--icon-color:#854d0e">📨</div>
+          <h3>Notifications / SMS</h3>
+          <p>Alertes et communications automatiques vers les tuteurs.</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon" style="--icon-bg:#e2e8f0;--icon-color:#334155">📥</div>
+          <h3>Import / Export</h3>
+          <p>Excel et CSV avec mapping intelligent et validation Zod.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== STACK TECHNIQUE ============== -->
+  <section id="stack" class="section section-alt">
+    <div class="container">
+      <header class="section-head">
+        <h2>Stack technique moderne</h2>
+        <p>Construit avec les meilleurs outils de l'écosystème JavaScript / TypeScript en 2025.</p>
+      </header>
+
+      <div class="stack-grid">
+        <div class="stack-col">
+          <h4>🎨 Frontend</h4>
+          <ul>
+            <li><strong>React 19</strong> + Vite 7</li>
+            <li><strong>Tailwind CSS 4</strong> + shadcn/ui</li>
+            <li><strong>React Query 5</strong> + Wouter</li>
+            <li><strong>Dexie.js</strong> (offline IndexedDB)</li>
+            <li><strong>Zod v4</strong> (validation)</li>
+          </ul>
+        </div>
+        <div class="stack-col">
+          <h4>⚙️ Backend</h4>
+          <ul>
+            <li><strong>Express 5</strong> + Node.js 24</li>
+            <li><strong>TypeScript 5.9</strong></li>
+            <li><strong>Drizzle ORM</strong> + PostgreSQL 15</li>
+            <li><strong>OpenAPI</strong> + génération Orval</li>
+            <li>pnpm workspaces (monorepo)</li>
+          </ul>
+        </div>
+        <div class="stack-col">
+          <h4>🔒 Sécurité</h4>
+          <ul>
+            <li><strong>Argon2id</strong> (hash des mots de passe)</li>
+            <li><strong>JWT HS256</strong> (accès 15 min)</li>
+            <li>Cookie <strong>httpOnly</strong> (refresh 7 j)</li>
+            <li>6 rôles (RBAC complet)</li>
+            <li>Audit log de toutes les actions</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== INSTALLATION ============== -->
+  <section id="install" class="section">
+    <div class="container">
+      <header class="section-head">
+        <h2>Installation locale</h2>
+        <p>Suivez ces étapes pour faire tourner CDEJ Espoir sur votre poste de développement.</p>
+      </header>
+
+      <div class="install-grid">
+        <div class="install-step">
+          <span class="step-num">1</span>
+          <h4>Prérequis</h4>
+          <ul class="check-list">
+            <li>Node.js 24+</li>
+            <li>pnpm 10+</li>
+            <li>PostgreSQL 15+</li>
+          </ul>
+        </div>
+        <div class="install-step">
+          <span class="step-num">2</span>
+          <h4>Cloner le dépôt</h4>
+          <pre><code>git clone https://github.com/lumeniax/cdej-espoir.git
+cd cdej-espoir
+pnpm install</code></pre>
+        </div>
+        <div class="install-step">
+          <span class="step-num">3</span>
+          <h4>Configuration</h4>
+          <pre><code>cp .env.example .env
+# éditer .env :
+# DATABASE_URL, JWT_SECRET,
+# REFRESH_SECRET, SESSION_SECRET</code></pre>
+        </div>
+        <div class="install-step">
+          <span class="step-num">4</span>
+          <h4>Base de données</h4>
+          <pre><code>pnpm --filter @workspace/db run push
+pnpm --filter @workspace/api-server run seed</code></pre>
+        </div>
+        <div class="install-step">
+          <span class="step-num">5</span>
+          <h4>Lancer le projet</h4>
+          <pre><code># Terminal 1 - API
+pnpm --filter @workspace/api-server run dev
+
+# Terminal 2 - Frontend
+pnpm --filter @workspace/cdej-espoir run dev</code></pre>
+        </div>
+        <div class="install-step">
+          <span class="step-num">6</span>
+          <h4>Déploiement Docker</h4>
+          <pre><code>docker-compose up -d
+# voir DEPLOYMENT.md pour la prod</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== COMPTES DEMO ============== -->
+  <section class="section section-alt">
+    <div class="container">
+      <header class="section-head">
+        <h2>Comptes de démonstration</h2>
+        <p>Mot de passe commun : <code>Demo1234!</code></p>
+      </header>
+
+      <div class="table-wrapper">
+        <table class="accounts-table">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Rôle</th>
+              <th>Accès</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>admin@cdej-espoir.local</code></td><td><span class="role role-admin">admin</span></td><td>Accès complet</td></tr>
+            <tr><td><code>coordinateur@cdej-espoir.local</code></td><td><span class="role role-coord">coordinateur</span></td><td>Gestion participants, présences</td></tr>
+            <tr><td><code>enseignant@cdej-espoir.local</code></td><td><span class="role role-teacher">enseignant</span></td><td>Présences, lecture participants</td></tr>
+            <tr><td><code>sante@cdej-espoir.local</code></td><td><span class="role role-health">santé</span></td><td>Mesures IMC, lecture participants</td></tr>
+            <tr><td><code>comptable@cdej-espoir.local</code></td><td><span class="role role-finance">comptable</span></td><td>Fiches paiement, lecture</td></tr>
+            <tr><td><code>viewer@cdej-espoir.local</code></td><td><span class="role role-viewer">viewer</span></td><td>Lecture seule</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== DOCUMENTATION ============== -->
+  <section id="docs" class="section">
+    <div class="container">
+      <header class="section-head">
+        <h2>Documentation complète</h2>
+        <p>Tout ce qu'il faut pour installer, déployer et utiliser CDEJ Espoir.</p>
+      </header>
+
+      <div class="docs-grid">
+        <a class="doc-card" href="https://github.com/lumeniax/cdej-espoir/blob/main/INSTALLATION.md" target="_blank" rel="noopener">
+          <span class="doc-icon">📘</span>
+          <h4>INSTALLATION.md</h4>
+          <p>Installation détaillée pas à pas.</p>
+        </a>
+        <a class="doc-card" href="https://github.com/lumeniax/cdej-espoir/blob/main/DEPLOYMENT.md" target="_blank" rel="noopener">
+          <span class="doc-icon">🚀</span>
+          <h4>DEPLOYMENT.md</h4>
+          <p>Déploiement VPS, Docker, production.</p>
+        </a>
+        <a class="doc-card" href="https://github.com/lumeniax/cdej-espoir/blob/main/SECURITY.md" target="_blank" rel="noopener">
+          <span class="doc-icon">🔐</span>
+          <h4>SECURITY.md</h4>
+          <p>Politique de sécurité et bonnes pratiques.</p>
+        </a>
+        <a class="doc-card" href="https://github.com/lumeniax/cdej-espoir/blob/main/USER_GUIDE.md" target="_blank" rel="noopener">
+          <span class="doc-icon">📖</span>
+          <h4>USER_GUIDE.md</h4>
+          <p>Guide utilisateur pas-à-pas.</p>
+        </a>
+        <a class="doc-card" href="https://github.com/lumeniax/cdej-espoir/blob/main/ADMIN_GUIDE.md" target="_blank" rel="noopener">
+          <span class="doc-icon">🛠️</span>
+          <h4>ADMIN_GUIDE.md</h4>
+          <p>Guide d'administration système.</p>
+        </a>
+        <a class="doc-card" href="https://github.com/lumeniax/cdej-espoir/blob/main/OFFLINE_MODE.md" target="_blank" rel="noopener">
+          <span class="doc-icon">📴</span>
+          <h4>OFFLINE_MODE.md</h4>
+          <p>Fonctionnement du mode hors-ligne.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== FOOTER ============== -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong>CDEJ Espoir TG0154</strong>
+        <p>Centre de Développement de l'Enfant et du Jeune — Togo 🇹🇬</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/lumeniax/cdej-espoir" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/lumeniax/cdej-espoir/issues" target="_blank" rel="noopener">Issues</a>
+        <a href="https://github.com/lumeniax/cdej-espoir/blob/main/README.md" target="_blank" rel="noopener">README</a>
+      </div>
+      <small>Logiciel libre — Licence MIT</small>
+    </div>
+  </footer>
+
+  <script src="app.js" defer></script>
+</body>
+</html>

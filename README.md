@@ -4,6 +4,14 @@ Logiciel de gestion des participants pour le Centre de Développement de l'Enfan
 
 Application web full-stack **mobile-first**, **PWA**, avec mode **hors-ligne** pour les présences de terrain.
 
+🌐 **Page vitrine du projet** : <https://lumeniax.github.io/cdej-espoir/>
+
+> ⚠️ **Important — GitHub Pages**
+>
+> Le site <https://lumeniax.github.io/cdej-espoir/> ne fait tourner **que la page-vitrine** du projet (dossier `docs-site/`). L'application réelle est une **stack full-stack** (React + Express + PostgreSQL + authentification JWT par cookies httpOnly) ; elle ne peut **pas** être hébergée sur GitHub Pages qui ne sert que du statique.
+>
+> Pour utiliser réellement le logiciel, suivez la section [Installation locale](#installation-locale) ou [DEPLOYMENT.md](./DEPLOYMENT.md) (Docker / VPS).
+
 ---
 
 ## Stack technique

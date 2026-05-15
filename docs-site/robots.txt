@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://lumeniax.github.io/cdej-espoir/sitemap.xml
