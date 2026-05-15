@@ -41,7 +41,8 @@ router.get("/tuteurs", async (req, res): Promise<void> => {
   let rows = await db.select().from(tuteursTable);
   if (q) {
     const search = q.toLowerCase();
-    rows = rows.filter(t =>
+    type TuteurRow = typeof rows[number];
+    rows = rows.filter((t: TuteurRow) =>
       t.nom.toLowerCase().includes(search) ||
       (t.prenoms || "").toLowerCase().includes(search) ||
       (t.telephone || "").includes(search)

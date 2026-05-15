@@ -7,8 +7,9 @@ const router = Router();
 router.get("/referentiels", async (req, res): Promise<void> => {
   const { type } = req.query as Record<string, string>;
   let rows = await db.select().from(referentielsTable).orderBy(referentielsTable.ordre);
-  if (type) rows = rows.filter(r => r.type === type);
-  res.json(rows.map(r => ({ id: r.id, type: r.type, valeur: r.valeur, ordre: r.ordre, actif: r.actif })));
+  type RefRow = typeof rows[number];
+  if (type) rows = rows.filter((r: RefRow) => r.type === type);
+  res.json(rows.map((r: RefRow) => ({ id: r.id, type: r.type, valeur: r.valeur, ordre: r.ordre, actif: r.actif })));
 });
 
 router.post("/referentiels", async (req, res): Promise<void> => {

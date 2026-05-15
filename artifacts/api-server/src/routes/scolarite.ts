@@ -26,7 +26,8 @@ router.get("/scolarite/bulletins", async (req, res): Promise<void> => {
   const rows = participantId
     ? await db.select().from(bulletinsTable).where(eq(bulletinsTable.participantId, participantId)).orderBy(desc(bulletinsTable.anneeScolaire))
     : await db.select().from(bulletinsTable).orderBy(desc(bulletinsTable.anneeScolaire)).limit(200);
-  res.json(rows.map(b => ({
+  type BulletinRow = typeof rows[number];
+  res.json(rows.map((b: BulletinRow) => ({
     id: b.id, participant_id: b.participantId, annee_scolaire: b.anneeScolaire,
     trimestre: b.trimestre, ecole: b.ecole, classe: b.classe,
     moyenne: b.moyenne ? parseFloat(String(b.moyenne)) : null,
@@ -81,7 +82,8 @@ router.get("/scolarite/frais", async (req, res): Promise<void> => {
   const rows = participantId
     ? await db.select().from(fraisScolairesTable).where(eq(fraisScolairesTable.participantId, participantId))
     : await db.select().from(fraisScolairesTable).limit(200);
-  res.json(rows.map(f => ({ ...f, montant: parseFloat(String(f.montant)) })));
+  type FraisRow = typeof rows[number];
+  res.json(rows.map((f: FraisRow) => ({ ...f, montant: parseFloat(String(f.montant)) })));
 });
 
 router.post("/scolarite/frais", requireNotViewer, validateBody(FraisSchema), async (req, res): Promise<void> => {

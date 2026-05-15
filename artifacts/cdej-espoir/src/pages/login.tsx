@@ -55,9 +55,18 @@ export default function Login() {
           setLocation("/dashboard");
         },
         onError: (error) => {
+          const msg = error.message || "";
+          const description =
+            msg.includes("401") || msg.toLowerCase().includes("identifiants")
+              ? "Identifiants invalides. Vérifiez votre email et mot de passe."
+              : msg.includes("429")
+              ? "Trop de tentatives. Réessayez dans 15 minutes."
+              : msg.includes("4") || msg.includes("5")
+              ? "Erreur de connexion. Veuillez réessayer."
+              : "Identifiants invalides.";
           toast({
             title: "Erreur de connexion",
-            description: error.message || "Identifiants invalides.",
+            description,
             variant: "destructive",
           });
         },

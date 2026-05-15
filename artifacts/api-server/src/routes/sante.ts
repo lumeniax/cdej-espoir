@@ -44,7 +44,8 @@ router.get("/sante/mesures", requireRole("admin", "coordinateur", "sante"), asyn
     ? db.select().from(santeMesuresTable).where(eq(santeMesuresTable.participantId, participantId)).orderBy(desc(santeMesuresTable.dateMesure))
     : db.select().from(santeMesuresTable).orderBy(desc(santeMesuresTable.dateMesure)).limit(100);
   const rows = await query;
-  res.json(rows.map(m => ({
+  type MesureRow = typeof rows[number];
+  res.json(rows.map((m: MesureRow) => ({
     id: m.id, participant_id: m.participantId, date_mesure: m.dateMesure,
     poids_kg: m.poidsKg ? parseFloat(String(m.poidsKg)) : null,
     taille_cm: m.tailleCm ? parseFloat(String(m.tailleCm)) : null,

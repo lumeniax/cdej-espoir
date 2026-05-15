@@ -17,15 +17,16 @@ router.get("/presences/sessions", async (req, res): Promise<void> => {
     .leftJoin(enseignantsTable, eq(presenceSessionsTable.enseignantId, enseignantsTable.id))
     .orderBy(desc(presenceSessionsTable.dateSession));
 
+  type SessionRow = typeof sessions[number];
   if (enseignant_id) {
     const eid = parseInt(enseignant_id, 10);
-    sessions = sessions.filter(s => s.session.enseignantId === eid);
+    sessions = sessions.filter((s: SessionRow) => s.session.enseignantId === eid);
   }
-  if (from) sessions = sessions.filter(s => s.session.dateSession >= from);
-  if (to) sessions = sessions.filter(s => s.session.dateSession <= to);
+  if (from) sessions = sessions.filter((s: SessionRow) => s.session.dateSession >= from);
+  if (to) sessions = sessions.filter((s: SessionRow) => s.session.dateSession <= to);
 
   // Get presence counts for each session
-  const sessionIds = sessions.map(s => s.session.id);
+  const sessionIds = sessions.map((s: SessionRow) => s.session.id);
   const allPresences = sessionIds.length > 0
     ? await db.select().from(presencesTable).where(
         inArray(presencesTable.sessionId, sessionIds as number[])
@@ -40,7 +41,7 @@ router.get("/presences/sessions", async (req, res): Promise<void> => {
     presMap.set(p.sessionId, cur);
   }
 
-  res.json(sessions.map(s => ({
+  res.json(sessions.map((s: SessionRow) => ({
     id: s.session.id,
     enseignant_id: s.session.enseignantId,
     enseignant_nom: s.enseignantNom,
@@ -92,7 +93,8 @@ router.get("/presences/sessions/:id", async (req, res): Promise<void> => {
     .leftJoin(participantsTable, eq(presencesTable.eleveId, participantsTable.id))
     .where(eq(presencesTable.sessionId, id));
 
-  const presences = presencesRows.map(r => ({
+  type PresenceRow = typeof presencesRows[number];
+  const presences = presencesRows.map((r: PresenceRow) => ({
     id: r.presence.id,
     eleve_id: r.presence.eleveId,
     eleve_nom: r.eleveNom || "",
@@ -100,8 +102,9 @@ router.get("/presences/sessions/:id", async (req, res): Promise<void> => {
     motif: r.presence.motif,
   }));
 
-  const nbP = presences.filter(p => p.statut === "P").length;
-  const nbA = presences.filter(p => p.statut === "A").length;
+  type PresenceFmt = typeof presences[number];
+  const nbP = presences.filter((p: PresenceFmt) => p.statut === "P").length;
+  const nbA = presences.filter((p: PresenceFmt) => p.statut === "A").length;
 
   res.json({
     id: session.id, enseignant_id: session.enseignantId,
@@ -192,12 +195,13 @@ router.get("/alertes-absences", async (req, res): Promise<void> => {
     .leftJoin(enseignantsTable, eq(alertesAbsencesTable.enseignantId, enseignantsTable.id))
     .orderBy(desc(alertesAbsencesTable.dateDetection));
 
+  type AlerteRow = typeof rows[number];
   if (resolue !== undefined) {
     const isResolue = resolue === "true";
-    rows = rows.filter(r => r.alerte.resolue === isResolue);
+    rows = rows.filter((r: AlerteRow) => r.alerte.resolue === isResolue);
   }
 
-  res.json(rows.map(r => ({
+  res.json(rows.map((r: AlerteRow) => ({
     id: r.alerte.id,
     eleve_id: r.alerte.eleveId,
     eleve_nom: r.eleveNom || "",
