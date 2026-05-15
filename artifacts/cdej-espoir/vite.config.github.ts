@@ -38,11 +38,16 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    sourcemap: false,
+    chunkSizeWarningLimit: 1500,
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ["react", "react-dom"],
-          ui: ["@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu"],
+          "vendor-react": ["react", "react-dom"],
+          "vendor-ui": ["@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu"],
+          "vendor-charts": ["recharts"],
+          "vendor-pdf": ["jspdf", "html2canvas"],
+          "vendor-xlsx": ["exceljs"],
         },
       },
     },

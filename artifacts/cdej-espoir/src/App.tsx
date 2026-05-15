@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -43,6 +43,7 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
+      staleTime: 30_000,
     },
   },
 });
@@ -55,7 +56,11 @@ function Router() {
   useNavigationProgress();
   return (
     <Switch>
+      {/* Route publique : login */}
       <Route path="/login" component={Login} />
+
+      {/* Redirige la racine vers le dashboard (le layout protégera derrière). */}
+      <Route path="/">{() => <Redirect to="/dashboard" />}</Route>
 
       <Route path="/dashboard" component={() => <Wrap><Dashboard /></Wrap>} />
       <Route path="/rapport-mensuel" component={() => <Wrap><RapportMensuel /></Wrap>} />
@@ -93,8 +98,11 @@ function Router() {
       <Route path="/admin/users" component={() => <Wrap><AdminUsers /></Wrap>} />
 
       <Route path="/about" component={() => <Wrap><About /></Wrap>} />
-      <Route path="/" component={() => <Wrap><Dashboard /></Wrap>} />
-      <Route component={() => <Wrap><NotFound /></Wrap>} />
+
+      {/* Catch-all 404 : volontairement HORS du layout protégé pour éviter
+          tout problème de redirection en boucle quand l'utilisateur n'est
+          pas authentifié. */}
+      <Route component={NotFound} />
     </Switch>
   );
 }

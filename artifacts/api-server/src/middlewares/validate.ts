@@ -1,6 +1,11 @@
 import { type Request, type Response, type NextFunction } from "express";
 import { type ZodSchema } from "zod";
 
+/**
+ * Valide `req.body` selon le schéma fourni. Si la validation réussit,
+ * `req.body` est remplacé par la valeur typée (utile pour bénéficier des
+ * transforms / defaults Zod côté handler).
+ */
 export function validateBody(schema: ZodSchema) {
   return (req: Request, res: Response, next: NextFunction): void => {
     const result = schema.safeParse(req.body);
@@ -22,6 +27,11 @@ export function validateBody(schema: ZodSchema) {
   };
 }
 
+/**
+ * Valide `req.query`. Note : Express 5 type `req.query` en lecture seule
+ * (ParsedQs), donc on n'écrase pas la valeur — on stocke plutôt le résultat
+ * sur `res.locals.query` pour qu'il soit accessible côté handler typé.
+ */
 export function validateQuery(schema: ZodSchema) {
   return (req: Request, res: Response, next: NextFunction): void => {
     const result = schema.safeParse(req.query);
@@ -38,6 +48,7 @@ export function validateQuery(schema: ZodSchema) {
       });
       return;
     }
+    res.locals.query = result.data;
     next();
   };
 }

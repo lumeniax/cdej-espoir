@@ -5,8 +5,11 @@ import type {
   ToastProps,
 } from "@/components/ui/toast"
 
-const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_LIMIT = 3
+// Délai entre la fermeture (animation) et la suppression définitive du DOM.
+// L'ancienne valeur (~16 min) était un bug : les toasts s'accumulaient en
+// mémoire et empêchaient l'apparition de nouveaux toasts au-delà de la limite.
+const TOAST_REMOVE_DELAY = 5_000
 
 type ToasterToast = ToastProps & {
   id: string
@@ -179,7 +182,7 @@ function useToast() {
         listeners.splice(index, 1)
       }
     }
-  }, [state])
+  }, [])
 
   return {
     ...state,

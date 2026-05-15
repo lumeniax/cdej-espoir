@@ -1,15 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
   <head>
     <meta charset="utf-8" />
     <title>CDEJ Espoir</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script>
-      // Redirect pour les routes SPA sur GitHub Pages
-      var repo = location.pathname.split('/')[1];
-      var path = location.pathname.slice(repo.length + 1) + location.search;
-      var redirect = '/' + repo + '/?p=' + encodeURIComponent(path);
-      location.replace(redirect);
+      // Redirection SPA pour GitHub Pages : on encode le chemin demandé dans le
+      // query string `?p=...` puis on revient sur l'index. Le bundle JS lira
+      // ce paramètre au démarrage pour rejouer la bonne route.
+      (function () {
+        try {
+          var segments = location.pathname.split('/').filter(Boolean);
+          var repo = segments.length > 0 ? segments[0] : '';
+          var rest = segments.slice(1).join('/');
+          var basePath = repo ? '/' + repo + '/' : '/';
+          var redirect = basePath + '?p=' + encodeURIComponent('/' + rest + location.search) + location.hash;
+          location.replace(redirect);
+        } catch (e) {
+          location.replace('/');
+        }
+      })();
     </script>
   </head>
-  <body></body>
+  <body>
+    <noscript>
+      Page introuvable. <a href="/">Retour à l'accueil</a>.
+    </noscript>
+  </body>
 </html>

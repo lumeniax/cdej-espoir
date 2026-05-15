@@ -28,22 +28,29 @@ import {
 import { cn } from "@/lib/utils";
 import { useLogout } from "@workspace/api-client-react";
 import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/lib/apiClient";
+import { apiFetch } from "@/lib/apiClient";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { GlobalSearch } from "../GlobalSearch";
 
+interface NotificationsResponse {
+  items: Array<{ id: number; lue: boolean }>;
+  unread: number;
+}
+
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [location] = useLocation();
-  const { user, logout: clearAuth } = useAuth();
+  const { user, logout: clearAuth, isAuthenticated } = useAuth();
   const { theme, setTheme } = useTheme();
   const logoutMutation = useLogout();
 
-  const { data: notifData } = useQuery({
+  const { data: notifData } = useQuery<NotificationsResponse>({
     queryKey: ["/api/notifications"],
-    queryFn: () => apiClient("/api/notifications").then(r => r.json()),
-    refetchInterval: 60000,
+    queryFn: () => apiFetch<NotificationsResponse>("/api/notifications"),
+    refetchInterval: 60_000,
+    // Évite des appels API inutiles si on n'est pas authentifié.
+    enabled: isAuthenticated,
   });
-  const unread: number = notifData?.unread ?? 0;
+  const unread = notifData?.unread ?? 0;
 
   const handleLogout = () => {
     logoutMutation.mutate(undefined, {
@@ -85,20 +92,36 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
     return false;
   };
 
-  const NavLink = ({ href, label, icon: Icon, badge }: { href: string; label: string; icon: React.ComponentType<{className?: string}>; badge?: number }) => {
+  const NavLink = ({
+    href,
+    label,
+    icon: Icon,
+    badge,
+  }: {
+    href: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    badge?: number;
+  }) => {
     const active = isActive(href);
     return (
       <Link href={href} className="block" onClick={() => onNavigate?.()}>
-        <div className={cn(
-          "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-          active
-            ? "bg-sidebar-accent text-sidebar-accent-foreground"
-            : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-        )}>
+        <div
+          className={cn(
+            "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+            active
+              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+              : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+          )}
+          aria-current={active ? "page" : undefined}
+        >
           <Icon className="w-4 h-4 flex-shrink-0" />
           <span className="flex-1">{label}</span>
           {badge != null && badge > 0 && (
-            <span className="bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0">
+            <span
+              className="bg-red-500 text-white text-xs font-bold rounded-full min-w-5 h-5 px-1 flex items-center justify-center flex-shrink-0"
+              aria-label={`${badge} non lus`}
+            >
               {badge > 9 ? "9+" : badge}
             </span>
           )}
@@ -107,11 +130,22 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
     );
   };
 
+  const initials =
+    user?.nom_complet
+      ?.split(" ")
+      .map((n: string) => n[0])
+      .filter(Boolean)
+      .join("")
+      .substring(0, 2)
+      .toUpperCase() ?? "U";
+
   return (
     <div className="w-64 bg-sidebar text-sidebar-foreground flex flex-col flex-shrink-0 border-r border-sidebar-border">
       <div className="h-16 flex items-center px-6 border-b border-sidebar-border">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded bg-primary flex items-center justify-center font-bold text-primary-foreground text-sm">E</div>
+          <div className="w-8 h-8 rounded bg-primary flex items-center justify-center font-bold text-primary-foreground text-sm">
+            E
+          </div>
           <span className="font-semibold text-lg tracking-tight">CDEJ Espoir</span>
         </div>
       </div>
@@ -121,7 +155,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           <div className="mb-2">
             <GlobalSearch />
           </div>
-          <nav className="space-y-1">
+          <nav className="space-y-1" aria-label="Navigation principale">
             {navItems.map((item) => (
               <NavLink key={item.href} {...item} />
             ))}
@@ -129,8 +163,10 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         </div>
 
         <div>
-          <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">Modules</div>
-          <nav className="space-y-1">
+          <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+            Modules
+          </div>
+          <nav className="space-y-1" aria-label="Modules">
             {moduleItems.map((item) => (
               <NavLink key={item.href} {...item} />
             ))}
@@ -138,7 +174,9 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         </div>
 
         <div>
-          <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">Notifications</div>
+          <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+            Notifications
+          </div>
           <nav className="space-y-1">
             <NavLink href="/notifications" label="Notifications" icon={Bell} badge={unread} />
           </nav>
@@ -146,8 +184,10 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
         {user?.role === "admin" && (
           <div>
-            <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">Administration</div>
-            <nav className="space-y-1">
+            <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+              Administration
+            </div>
+            <nav className="space-y-1" aria-label="Administration">
               {adminItems.map((item) => (
                 <NavLink key={item.href} {...item} />
               ))}
@@ -165,33 +205,43 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       <div className="p-4 border-t border-sidebar-border bg-sidebar-accent/20">
         <div className="flex items-center gap-3 mb-4 px-2">
           <Avatar className="w-8 h-8 rounded-full border border-sidebar-border bg-sidebar-primary/20 text-sidebar-primary">
-            <AvatarFallback className="bg-transparent font-medium text-sm">
-              {user?.nom_complet?.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() ?? 'U'}
-            </AvatarFallback>
+            <AvatarFallback className="bg-transparent font-medium text-sm">{initials}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">{user?.nom_complet}</p>
             <p className="text-xs text-sidebar-foreground/60 capitalize truncate">{user?.role}</p>
           </div>
         </div>
-        <Link href="/profile" className="w-full flex items-center gap-2 px-3 py-2 mb-1 rounded-md text-sm font-medium text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors" onClick={() => onNavigate?.()}>
+        <Link
+          href="/profile"
+          className="w-full flex items-center gap-2 px-3 py-2 mb-1 rounded-md text-sm font-medium text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
+          onClick={() => onNavigate?.()}
+        >
           <User className="w-4 h-4 flex-shrink-0" />
           <span>Mon profil</span>
         </Link>
         <button
+          type="button"
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           className="w-full flex items-center gap-2 px-3 py-2 mb-1 rounded-md text-sm font-medium text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
           data-testid="button-dark-mode-toggle"
+          aria-label={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}
         >
-          {theme === "dark" ? <Sun className="w-4 h-4 flex-shrink-0" /> : <Moon className="w-4 h-4 flex-shrink-0" />}
+          {theme === "dark" ? (
+            <Sun className="w-4 h-4 flex-shrink-0" />
+          ) : (
+            <Moon className="w-4 h-4 flex-shrink-0" />
+          )}
           <span>{theme === "dark" ? "Mode clair" : "Mode sombre"}</span>
         </button>
         <button
+          type="button"
           onClick={handleLogout}
-          className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
+          disabled={logoutMutation.isPending}
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors disabled:opacity-60"
         >
           <LogOut className="w-4 h-4 flex-shrink-0" />
-          <span>Déconnexion</span>
+          <span>{logoutMutation.isPending ? "Déconnexion..." : "Déconnexion"}</span>
         </button>
       </div>
     </div>

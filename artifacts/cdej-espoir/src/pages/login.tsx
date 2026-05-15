@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { HeartHandshake } from "lucide-react";
+import { HeartHandshake, Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Email invalide" }),
@@ -26,9 +26,17 @@ const formSchema = z.object({
 
 export default function Login() {
   const [, setLocation] = useLocation();
-  const { login } = useAuth();
+  const { login, isAuthenticated, initializing } = useAuth();
   const loginMutation = useLogin();
   const { toast } = useToast();
+
+  // Si l'utilisateur est déjà authentifié (cookie de refresh valide), on le
+  // renvoie directement sur le dashboard plutôt que d'afficher le formulaire.
+  useEffect(() => {
+    if (!initializing && isAuthenticated) {
+      setLocation("/dashboard");
+    }
+  }, [initializing, isAuthenticated, setLocation]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,6 +62,20 @@ export default function Login() {
           });
         },
       }
+    );
+  }
+
+  // Pendant le bootstrap auth, on évite de flasher le formulaire de login.
+  if (initializing) {
+    return (
+      <div
+        className="min-h-[100dvh] flex items-center justify-center bg-background"
+        role="status"
+        aria-live="polite"
+      >
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        <span className="sr-only">Chargement…</span>
+      </div>
     );
   }
 
@@ -100,7 +122,7 @@ export default function Login() {
           </div>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" noValidate>
               <FormField
                 control={form.control}
                 name="email"
@@ -108,7 +130,14 @@ export default function Login() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="nom@exemple.com" {...field} />
+                      <Input
+                        type="email"
+                        autoComplete="email"
+                        autoCapitalize="none"
+                        spellCheck={false}
+                        placeholder="nom@exemple.com"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -122,7 +151,12 @@ export default function Login() {
                   <FormItem>
                     <FormLabel>Mot de passe</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
+                      <Input
+                        type="password"
+                        autoComplete="current-password"
+                        placeholder="••••••••"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -134,7 +168,14 @@ export default function Login() {
                 className="w-full h-11 text-base shadow-sm"
                 disabled={loginMutation.isPending}
               >
-                {loginMutation.isPending ? "Connexion..." : "Se connecter"}
+                {loginMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Connexion...
+                  </>
+                ) : (
+                  "Se connecter"
+                )}
               </Button>
             </form>
           </Form>
