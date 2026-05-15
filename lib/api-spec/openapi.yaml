@@ -797,6 +797,26 @@ paths:
                 items:
                   $ref: "#/components/schemas/Participant"
 
+  /stats/rapport-mensuel:
+    get:
+      operationId: getRapportMensuel
+      tags: [stats]
+      summary: Rapport mensuel d'activité
+      parameters:
+        - name: year
+          in: query
+          schema: { type: integer }
+        - name: month
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Rapport mensuel
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RapportMensuel"
+
   # ─── RÉFÉRENTIELS ─────────────────────────────────────────────────
   /referentiels:
     get:
@@ -1669,6 +1689,113 @@ components:
           items:
             $ref: "#/components/schemas/AlerteInfo"
         nb_alertes_non_resolues:
+          type: integer
+        participants_actifs:
+          type: integer
+        vaccins_en_retard:
+          type: integer
+        depenses_mois:
+          type: number
+          format: float
+        par_village:
+          type: array
+          items:
+            $ref: "#/components/schemas/VillageStat"
+        departs_prochains:
+          type: array
+          items:
+            $ref: "#/components/schemas/DepartInfo"
+        anniversaires_prochains:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnniversaireInfo"
+        alertes_sante_electro:
+          type: array
+          items:
+            type: object
+            properties:
+              nom:
+                type: string
+              electrophorese:
+                type: string
+
+    RapportMensuel:
+      type: object
+      required: [periode, presences, participants, finances, alertes]
+      properties:
+        periode:
+          type: object
+          required: [year, month, label, firstDay, lastDay]
+          properties:
+            year: { type: integer }
+            month: { type: integer }
+            label: { type: string }
+            firstDay: { type: string }
+            lastDay: { type: string }
+        presences:
+          type: object
+          required: [nb_sessions, total_presents, total_absents, taux_moyen]
+          properties:
+            nb_sessions: { type: integer }
+            total_presents: { type: integer }
+            total_absents: { type: integer }
+            taux_moyen: { type: integer }
+        participants:
+          type: object
+          required: [total, actifs, nouveaux, nouveaux_liste]
+          properties:
+            total: { type: integer }
+            actifs: { type: integer }
+            nouveaux: { type: integer }
+            nouveaux_liste:
+              type: array
+              items: { type: string }
+        finances:
+          type: object
+          required: [recettes, depenses, solde, nb_transactions]
+          properties:
+            recettes: { type: number }
+            depenses: { type: number }
+            solde: { type: number }
+            nb_transactions: { type: integer }
+        alertes:
+          type: object
+          required: [absences_non_resolues, vaccins_en_retard]
+          properties:
+            absences_non_resolues: { type: integer }
+            vaccins_en_retard: { type: integer }
+
+    VillageStat:
+      type: object
+      required: [village, nb]
+      properties:
+        village:
+          type: string
+        nb:
+          type: integer
+
+    DepartInfo:
+      type: object
+      required: [nom, id_fmt, date, jours]
+      properties:
+        nom:
+          type: string
+        id_fmt:
+          type: string
+        date:
+          type: string
+        jours:
+          type: integer
+
+    AnniversaireInfo:
+      type: object
+      required: [nom, date, jours]
+      properties:
+        nom:
+          type: string
+        date:
+          type: string
+        jours:
           type: integer
 
     # ─── RÉFÉRENTIELS ─────────────────────────────────────────────────
