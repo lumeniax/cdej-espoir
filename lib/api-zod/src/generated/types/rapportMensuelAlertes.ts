@@ -6,10 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface FicheLigneInput {
-  ordre: number;
-  nom: string;
-  /** @nullable */
-  contact?: string | null;
-  montant: number;
-}
+export type RapportMensuelAlertes = {
+  absences_non_resolues: number;
+  vaccins_en_retard: number;
+};

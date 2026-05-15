@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface FicheLigneInput {
-  ordre: number;
-  nom: string;
-  /** @nullable */
-  contact?: string | null;
-  montant: number;
-}
+export type RapportMensuelPeriode = {
+  year: number;
+  month: number;
+  label: string;
+  firstDay: string;
+  lastDay: string;
+};

@@ -6,10 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface FicheLigneInput {
-  ordre: number;
+export interface AnniversaireInfo {
   nom: string;
-  /** @nullable */
-  contact?: string | null;
-  montant: number;
+  date: string;
+  jours: number;
 }

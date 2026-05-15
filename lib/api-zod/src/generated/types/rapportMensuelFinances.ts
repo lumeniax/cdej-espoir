@@ -6,10 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface FicheLigneInput {
-  ordre: number;
-  nom: string;
-  /** @nullable */
-  contact?: string | null;
-  montant: number;
-}
+export type RapportMensuelFinances = {
+  recettes: number;
+  depenses: number;
+  solde: number;
+  nb_transactions: number;
+};
