@@ -14,6 +14,7 @@ import ParticipantsList from "@/pages/participants";
 import ParticipantsNew from "@/pages/participants/new";
 import ParticipantDetail from "@/pages/participants/detail";
 import ParticipantsEdit from "@/pages/participants/edit";
+import ParticipantRapportPdf from "@/pages/participants/rapport-pdf";
 import EnseignantsList from "@/pages/enseignants";
 import EnseignantDetail from "@/pages/enseignants/detail";
 import EtablissementsList from "@/pages/etablissements";
@@ -67,6 +68,7 @@ function Router() {
       <Route path="/profile" component={() => <Wrap><Profile /></Wrap>} />
 
       <Route path="/participants/new" component={() => <Wrap><ParticipantsNew /></Wrap>} />
+      <Route path="/participants/:id/rapport" component={() => <Wrap><ParticipantRapportPdf /></Wrap>} />
       <Route path="/participants/:id/edit" component={() => <Wrap><ParticipantsEdit /></Wrap>} />
       <Route path="/participants/:id" component={() => <Wrap><ParticipantDetail /></Wrap>} />
       <Route path="/participants" component={() => <Wrap><ParticipantsList /></Wrap>} />

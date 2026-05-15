@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, participantsTable, alertesAbsencesTable, enseignantsTable, transactionsTable, vaccinationsTable, presenceSessionsTable, presencesTable } from "@workspace/db";
+import { db, participantsTable, alertesAbsencesTable, enseignantsTable, transactionsTable, vaccinationsTable, presenceSessionsTable, presencesTable, santeMesuresTable, bulletinsTable } from "@workspace/db";
 import { eq, and, sql, desc, lt, gte, lte, isNull, not, inArray, between, count, avg } from "drizzle-orm";
 
 const router = Router();
@@ -296,6 +296,170 @@ router.get("/stats/rapport-mensuel", async (req, res): Promise<void> => {
     alertes: {
       absences_non_resolues: Number(alertesNonResolues[0]?.nb ?? 0),
       vaccins_en_retard: Number(vaccins[0]?.nb ?? 0),
+    },
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Rapport individuel participant
+// ---------------------------------------------------------------------------
+const MOIS_FR_SHORT = ["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"];
+const MOIS_FR_LONG  = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+
+function anneeScolaire(year: number, month: number): string {
+  return month >= 9 ? `${year}-${year + 1}` : `${year - 1}-${year}`;
+}
+
+router.get("/stats/rapport-participant", async (req, res): Promise<void> => {
+  const participantId = req.query.participant_id ? parseInt(req.query.participant_id as string, 10) : null;
+  const year  = req.query.year  ? parseInt(req.query.year  as string, 10) : new Date().getFullYear();
+  const month = req.query.month ? parseInt(req.query.month as string, 10) : new Date().getMonth() + 1;
+
+  if (!participantId || isNaN(participantId)) {
+    res.status(400).json({ error: "participant_id requis" });
+    return;
+  }
+
+  const firstDay = `${year}-${String(month).padStart(2, "0")}-01`;
+  const lastDayDate = new Date(year, month, 0);
+  const lastDay = `${year}-${String(month).padStart(2, "0")}-${String(lastDayDate.getDate()).padStart(2, "0")}`;
+
+  const [participant, sessions, mesures, vaccins, bulletins] = await Promise.all([
+    db.select().from(participantsTable).where(eq(participantsTable.id, participantId)).limit(1),
+
+    // Sessions dans le mois avec statut du participant
+    db.select({
+      sessionId: presenceSessionsTable.id,
+      dateSession: presenceSessionsTable.dateSession,
+      enseignantId: enseignantsTable.id,
+      enseignantNom: enseignantsTable.nom,
+      statut: presencesTable.statut,
+      motif: presencesTable.motif,
+    }).from(presenceSessionsTable)
+      .leftJoin(enseignantsTable, eq(presenceSessionsTable.enseignantId, enseignantsTable.id))
+      .leftJoin(presencesTable, and(
+        eq(presencesTable.sessionId, presenceSessionsTable.id),
+        eq(presencesTable.eleveId, participantId),
+      ))
+      .where(and(
+        gte(presenceSessionsTable.dateSession, firstDay),
+        lte(presenceSessionsTable.dateSession, lastDay),
+      ))
+      .orderBy(presenceSessionsTable.dateSession),
+
+    // Toutes les mesures de santé pour le participant, récentes en premier
+    db.select().from(santeMesuresTable)
+      .where(eq(santeMesuresTable.participantId, participantId))
+      .orderBy(desc(santeMesuresTable.dateMesure))
+      .limit(10),
+
+    // Vaccinations
+    db.select().from(vaccinationsTable)
+      .where(eq(vaccinationsTable.participantId, participantId))
+      .orderBy(vaccinationsTable.vaccin),
+
+    // Bulletins pour l'année scolaire correspondant au mois
+    db.select().from(bulletinsTable)
+      .where(and(
+        eq(bulletinsTable.participantId, participantId),
+        eq(bulletinsTable.anneeScolaire, anneeScolaire(year, month)),
+      ))
+      .orderBy(bulletinsTable.trimestre),
+  ]);
+
+  if (!participant[0]) {
+    res.status(404).json({ error: "Participant non trouvé" });
+    return;
+  }
+
+  const p = participant[0];
+  const age = calcAge(p.dateNaissance);
+
+  // Présences du mois
+  type SessionRow = typeof sessions[number];
+  const nbPresent = sessions.filter((s: SessionRow) => s.statut === "P").length;
+  const nbAbsent  = sessions.filter((s: SessionRow) => s.statut === "A").length;
+  const nbRetard  = sessions.filter((s: SessionRow) => s.statut === "R").length;
+  const nbTotal   = sessions.length;
+  const taux = nbTotal > 0 ? Math.round((nbPresent / nbTotal) * 100) : null;
+
+  // Santé : dernière mesure (peut être hors du mois)
+  const derniereMesure = mesures[0] ?? null;
+  const today = new Date().toISOString().slice(0, 10);
+  type VaccinRow = typeof vaccins[number];
+  const vaccinsFormates = vaccins.map((v: VaccinRow) => ({
+    vaccin: v.vaccin,
+    date_administration: v.dateAdministration,
+    date_prochaine_dose: v.dateProchainesDose,
+    en_retard: v.dateProchainesDose ? v.dateProchainesDose < today : false,
+  }));
+
+  const annee = anneeScolaire(year, month);
+  type BulletinRow = typeof bulletins[number];
+  const bulletinsFormates = bulletins.map((b: BulletinRow) => ({
+    trimestre: b.trimestre,
+    ecole: b.ecole,
+    classe: b.classe,
+    moyenne: b.moyenne ? parseFloat(String(b.moyenne)) : null,
+    rang: b.rang,
+    total_eleves: b.totalEleves,
+    appreciation: b.appreciation,
+    observation: b.observation,
+  }));
+
+  const moyenneAnnuelle = bulletinsFormates.filter(b => b.moyenne !== null).length > 0
+    ? Math.round(bulletinsFormates.reduce((acc, b) => acc + (b.moyenne ?? 0), 0) / bulletinsFormates.filter(b => b.moyenne !== null).length * 100) / 100
+    : null;
+
+  res.json({
+    participant: {
+      id: p.id,
+      numero: `TG015400${String(p.numeroOrdre).padStart(3, "0")}`,
+      nom_prenoms: p.nomPrenoms,
+      date_naissance: p.dateNaissance,
+      age: age !== null ? Math.floor(age) : null,
+      niveau_scolaire: p.niveauScolaire,
+      classe: p.classe,
+      ecole: p.ecole,
+      statut: p.statut,
+      electrophorese: p.electrophorese,
+    },
+    periode: {
+      year,
+      month,
+      label: `${MOIS_FR_LONG[month - 1]} ${year}`,
+      abbr: `${MOIS_FR_SHORT[month - 1]} ${year}`,
+      firstDay,
+      lastDay,
+    },
+    presences: {
+      sessions: sessions.map((s: SessionRow) => ({
+        date: s.dateSession,
+        enseignant: s.enseignantNom,
+        statut: s.statut ?? "—",
+        motif: s.motif,
+      })),
+      nb_present: nbPresent,
+      nb_absent: nbAbsent,
+      nb_retard: nbRetard,
+      nb_total: nbTotal,
+      taux,
+    },
+    sante: {
+      derniere_mesure: derniereMesure ? {
+        date: derniereMesure.dateMesure,
+        poids_kg: derniereMesure.poidsKg ? parseFloat(String(derniereMesure.poidsKg)) : null,
+        taille_cm: derniereMesure.tailleCm ? parseFloat(String(derniereMesure.tailleCm)) : null,
+        imc: derniereMesure.imc ? parseFloat(String(derniereMesure.imc)) : null,
+        classification: derniereMesure.imcClassification,
+        etat_nutritionnel: derniereMesure.etatNutritioNnel,
+      } : null,
+      vaccinations: vaccinsFormates,
+    },
+    scolarite: {
+      annee_scolaire: annee,
+      bulletins: bulletinsFormates,
+      moyenne_annuelle: moyenneAnnuelle,
     },
   });
 });

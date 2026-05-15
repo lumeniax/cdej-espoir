@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { ArrowLeft, Edit, Trash2, User, Heart, School, Calendar } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, User, Heart, School, Calendar, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -79,7 +79,8 @@ export default function ParticipantDetail() {
             <p className="text-muted-foreground text-sm mt-1">{p.age_clair} — {p.tranche_age}</p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Link href={`/participants/${id}/rapport`}><Button variant="outline" size="sm"><FileText className="h-4 w-4 mr-2" />Rapport PDF</Button></Link>
           <Link href={`/participants/${id}/edit`}><Button variant="outline" size="sm"><Edit className="h-4 w-4 mr-2" />Modifier</Button></Link>
           <AlertDialog>
             <AlertDialogTrigger asChild>
