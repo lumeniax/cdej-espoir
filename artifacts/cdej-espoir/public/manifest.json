@@ -1,0 +1,13 @@
+{
+  "name": "CDEJ Espoir TG0154",
+  "short_name": "CDEJ Espoir",
+  "description": "Gestion des participants CDEJ Espoir Togo",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f3ea",
+  "theme_color": "#1a4d2e",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
