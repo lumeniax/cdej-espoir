@@ -36,6 +36,7 @@ import Documents from "@/pages/documents";
 import Notifications from "@/pages/notifications";
 import ImportExport from "@/pages/import-export";
 import Profile from "@/pages/profile/index";
+import RapportMensuel from "@/pages/rapport-mensuel";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -57,6 +58,7 @@ function Router() {
       <Route path="/login" component={Login} />
 
       <Route path="/dashboard" component={() => <Wrap><Dashboard /></Wrap>} />
+      <Route path="/rapport-mensuel" component={() => <Wrap><RapportMensuel /></Wrap>} />
       <Route path="/profile" component={() => <Wrap><Profile /></Wrap>} />
 
       <Route path="/participants/new" component={() => <Wrap><ParticipantsNew /></Wrap>} />
