@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>CDEJ Espoir</title>
+    <script>
+      // Redirect pour les routes SPA sur GitHub Pages
+      var repo = location.pathname.split('/')[1];
+      var path = location.pathname.slice(repo.length + 1) + location.search;
+      var redirect = '/' + repo + '/?p=' + encodeURIComponent(path);
+      location.replace(redirect);
+    </script>
+  </head>
+  <body></body>
+</html>
