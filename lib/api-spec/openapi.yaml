@@ -1,0 +1,1701 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API CDEJ Espoir TG0154 - Gestion des participants
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentification
+  - name: participants
+    description: Gestion des participants
+  - name: enseignants
+    description: Gestion des enseignants
+  - name: etablissements
+    description: Gestion des établissements scolaires
+  - name: affectations
+    description: Affectations enfant-enseignant et enfant-établissement
+  - name: presences
+    description: Sessions de présences
+  - name: imc
+    description: Suivi IMC
+  - name: fiches
+    description: Fiches de paiement
+  - name: stats
+    description: Statistiques tableau de bord
+  - name: referentiels
+    description: Données de référence
+  - name: users
+    description: Gestion des utilisateurs
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # ─── AUTH ────────────────────────────────────────────────────────
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Connexion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Connecté
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Identifiants invalides
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Utilisateur courant
+      responses:
+        "200":
+          description: Utilisateur courant
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Non authentifié
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Déconnexion
+      responses:
+        "200":
+          description: Déconnecté
+
+  # ─── PARTICIPANTS ─────────────────────────────────────────────────
+  /participants:
+    get:
+      operationId: listParticipants
+      tags: [participants]
+      summary: Liste des participants
+      parameters:
+        - name: q
+          in: query
+          schema: { type: string }
+        - name: sexe
+          in: query
+          schema: { type: string }
+        - name: village
+          in: query
+          schema: { type: string }
+        - name: programme
+          in: query
+          schema: { type: string }
+        - name: tranche
+          in: query
+          schema: { type: string }
+        - name: electrophorese
+          in: query
+          schema: { type: string }
+        - name: groupe_sanguin
+          in: query
+          schema: { type: string }
+        - name: enseignant_id
+          in: query
+          schema: { type: integer }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: page_size
+          in: query
+          schema: { type: integer, default: 50 }
+      responses:
+        "200":
+          description: Liste paginée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParticipantList"
+    post:
+      operationId: createParticipant
+      tags: [participants]
+      summary: Créer un participant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ParticipantInput"
+      responses:
+        "201":
+          description: Créé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Participant"
+
+  /participants/{id}:
+    get:
+      operationId: getParticipant
+      tags: [participants]
+      summary: Détail d'un participant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Participant
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParticipantDetail"
+        "404":
+          description: Non trouvé
+    put:
+      operationId: updateParticipant
+      tags: [participants]
+      summary: Modifier un participant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ParticipantInput"
+      responses:
+        "200":
+          description: Modifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Participant"
+        "404":
+          description: Non trouvé
+    delete:
+      operationId: deleteParticipant
+      tags: [participants]
+      summary: Supprimer un participant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Supprimé
+        "404":
+          description: Non trouvé
+
+  # ─── ENSEIGNANTS ─────────────────────────────────────────────────
+  /enseignants:
+    get:
+      operationId: listEnseignants
+      tags: [enseignants]
+      summary: Liste des enseignants
+      parameters:
+        - name: q
+          in: query
+          schema: { type: string }
+        - name: actif
+          in: query
+          schema: { type: boolean }
+      responses:
+        "200":
+          description: Liste
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Enseignant"
+    post:
+      operationId: createEnseignant
+      tags: [enseignants]
+      summary: Créer un enseignant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnseignantInput"
+      responses:
+        "201":
+          description: Créé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Enseignant"
+        "409":
+          description: Nom déjà utilisé
+
+  /enseignants/{id}:
+    get:
+      operationId: getEnseignant
+      tags: [enseignants]
+      summary: Détail enseignant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Enseignant avec élèves
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnseignantDetail"
+        "404":
+          description: Non trouvé
+    put:
+      operationId: updateEnseignant
+      tags: [enseignants]
+      summary: Modifier un enseignant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnseignantInput"
+      responses:
+        "200":
+          description: Modifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Enseignant"
+        "404":
+          description: Non trouvé
+    delete:
+      operationId: deleteEnseignant
+      tags: [enseignants]
+      summary: Supprimer un enseignant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Supprimé
+        "409":
+          description: A des élèves affectés
+
+  # ─── ÉTABLISSEMENTS ───────────────────────────────────────────────
+  /etablissements:
+    get:
+      operationId: listEtablissements
+      tags: [etablissements]
+      summary: Liste des établissements
+      responses:
+        "200":
+          description: Liste
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Etablissement"
+    post:
+      operationId: createEtablissement
+      tags: [etablissements]
+      summary: Créer un établissement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EtablissementInput"
+      responses:
+        "201":
+          description: Créé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Etablissement"
+
+  /etablissements/{id}:
+    get:
+      operationId: getEtablissement
+      tags: [etablissements]
+      summary: Détail établissement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Établissement avec élèves
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EtablissementDetail"
+        "404":
+          description: Non trouvé
+    put:
+      operationId: updateEtablissement
+      tags: [etablissements]
+      summary: Modifier un établissement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EtablissementInput"
+      responses:
+        "200":
+          description: Modifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Etablissement"
+    delete:
+      operationId: deleteEtablissement
+      tags: [etablissements]
+      summary: Supprimer un établissement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Supprimé
+
+  # ─── AFFECTATIONS ─────────────────────────────────────────────────
+  /affectations/enseignant:
+    post:
+      operationId: affecterEnseignant
+      tags: [affectations]
+      summary: Affecter un élève à un enseignant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AffectationEnseignantInput"
+      responses:
+        "201":
+          description: Affecté
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AffectationEnseignant"
+        "409":
+          description: Élève déjà affecté
+
+  /affectations/enseignant/{eleveId}:
+    delete:
+      operationId: desaffecterEnseignant
+      tags: [affectations]
+      summary: Désaffecter un élève de son enseignant
+      parameters:
+        - name: eleveId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Désaffecté
+
+  /affectations/etablissement:
+    post:
+      operationId: affecterEtablissement
+      tags: [affectations]
+      summary: Inscrire un élève dans un établissement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AffectationEtablissementInput"
+      responses:
+        "201":
+          description: Inscrit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AffectationEtablissement"
+        "409":
+          description: Élève déjà inscrit
+
+  /affectations/etablissement/{eleveId}:
+    delete:
+      operationId: desaffecterEtablissement
+      tags: [affectations]
+      summary: Désinscrire un élève d'un établissement
+      parameters:
+        - name: eleveId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Désinscrit
+
+  # ─── PRÉSENCES ────────────────────────────────────────────────────
+  /presences/sessions:
+    get:
+      operationId: listSessions
+      tags: [presences]
+      summary: Liste des sessions de présence
+      parameters:
+        - name: enseignant_id
+          in: query
+          schema: { type: integer }
+        - name: from
+          in: query
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        "200":
+          description: Sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PresenceSession"
+    post:
+      operationId: createSession
+      tags: [presences]
+      summary: Créer une session de présence
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionInput"
+      responses:
+        "201":
+          description: Session créée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PresenceSession"
+        "409":
+          description: Date déjà existante pour cet enseignant
+
+  /presences/sessions/{id}:
+    get:
+      operationId: getSession
+      tags: [presences]
+      summary: Détail d'une session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Session avec présences
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PresenceSessionDetail"
+    delete:
+      operationId: deleteSession
+      tags: [presences]
+      summary: Supprimer une session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Supprimée
+
+  /presences/batch:
+    post:
+      operationId: savePresencesBatch
+      tags: [presences]
+      summary: Saisir les présences d'une session complète
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PresenceBatchInput"
+      responses:
+        "200":
+          description: Présences enregistrées
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PresenceBatchResult"
+
+  /alertes-absences:
+    get:
+      operationId: listAlertesAbsences
+      tags: [presences]
+      summary: Alertes absences consécutives
+      parameters:
+        - name: resolue
+          in: query
+          schema: { type: boolean }
+      responses:
+        "200":
+          description: Alertes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AlerteAbsence"
+
+  /alertes-absences/{id}:
+    patch:
+      operationId: resolveAlerteAbsence
+      tags: [presences]
+      summary: Marquer une alerte comme résolue
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlerteResolveInput"
+      responses:
+        "200":
+          description: Alerte mise à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlerteAbsence"
+
+  # ─── IMC ─────────────────────────────────────────────────────────
+  /imc:
+    get:
+      operationId: listImc
+      tags: [imc]
+      summary: Liste des mesures IMC
+      parameters:
+        - name: participant_id
+          in: query
+          schema: { type: integer }
+        - name: from
+          in: query
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        "200":
+          description: Mesures IMC
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ImcMesure"
+    post:
+      operationId: createImcMesure
+      tags: [imc]
+      summary: Saisir une mesure IMC
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImcInput"
+      responses:
+        "201":
+          description: Mesure créée avec IMC calculé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImcMesure"
+        "422":
+          description: Valeurs invalides
+
+  /imc/{id}:
+    get:
+      operationId: getImcMesure
+      tags: [imc]
+      summary: Détail d'une mesure IMC
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Mesure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImcMesure"
+    delete:
+      operationId: deleteImcMesure
+      tags: [imc]
+      summary: Supprimer une mesure IMC
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Supprimée
+
+  # ─── FICHES DE PAIEMENT ───────────────────────────────────────────
+  /fiches-paiement:
+    get:
+      operationId: listFichesPaiement
+      tags: [fiches]
+      summary: Liste des fiches de paiement
+      responses:
+        "200":
+          description: Liste
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FichePaiement"
+    post:
+      operationId: createFichePaiement
+      tags: [fiches]
+      summary: Créer une fiche de paiement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FichePaiementInput"
+      responses:
+        "201":
+          description: Créée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FichePaiement"
+
+  /fiches-paiement/{id}:
+    get:
+      operationId: getFichePaiement
+      tags: [fiches]
+      summary: Détail d'une fiche
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Fiche avec lignes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FichePaiementDetail"
+    put:
+      operationId: updateFichePaiement
+      tags: [fiches]
+      summary: Modifier une fiche
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FichePaiementInput"
+      responses:
+        "200":
+          description: Modifiée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FichePaiement"
+    delete:
+      operationId: deleteFichePaiement
+      tags: [fiches]
+      summary: Supprimer une fiche
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Supprimée
+
+  # ─── STATS TABLEAU DE BORD ────────────────────────────────────────
+  /stats/dashboard:
+    get:
+      operationId: getDashboard
+      tags: [stats]
+      summary: Données du tableau de bord
+      responses:
+        "200":
+          description: Statistiques
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+
+  /stats/depart-imminent:
+    get:
+      operationId: getDepartImminent
+      tags: [stats]
+      summary: Participants dont le départ est imminent (≤ 2 ans)
+      responses:
+        "200":
+          description: Liste
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Participant"
+
+  # ─── RÉFÉRENTIELS ─────────────────────────────────────────────────
+  /referentiels:
+    get:
+      operationId: listReferentiels
+      tags: [referentiels]
+      summary: Liste des valeurs de référence
+      parameters:
+        - name: type
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Valeurs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Referentiel"
+    post:
+      operationId: createReferentiel
+      tags: [referentiels]
+      summary: Ajouter une valeur de référence
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReferentielInput"
+      responses:
+        "201":
+          description: Créé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Referentiel"
+
+  /referentiels/{id}:
+    put:
+      operationId: updateReferentiel
+      tags: [referentiels]
+      summary: Modifier une valeur de référence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReferentielInput"
+      responses:
+        "200":
+          description: Modifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Referentiel"
+    delete:
+      operationId: deleteReferentiel
+      tags: [referentiels]
+      summary: Supprimer une valeur de référence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Supprimé
+
+  # ─── UTILISATEURS ─────────────────────────────────────────────────
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: Liste des utilisateurs
+      responses:
+        "200":
+          description: Liste
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Créer un utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInput"
+      responses:
+        "201":
+          description: Créé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{id}:
+    put:
+      operationId: updateUser
+      tags: [users]
+      summary: Modifier un utilisateur
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Modifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Supprimer un utilisateur
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "204":
+          description: Supprimé
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required: [status]
+
+    # ─── AUTH ────────────────────────────────────────────────────────
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      required: [access_token, user]
+      properties:
+        access_token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+
+    User:
+      type: object
+      required: [id, email, nom_complet, role]
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        nom_complet:
+          type: string
+        role:
+          type: string
+          enum: [admin, coordinator, enseignant, viewer]
+        enseignant_id:
+          type: ["integer", "null"]
+        actif:
+          type: boolean
+        last_login_at:
+          type: ["string", "null"]
+        created_at:
+          type: string
+
+    UserInput:
+      type: object
+      required: [email, nom_complet, role, password]
+      properties:
+        email:
+          type: string
+          format: email
+        nom_complet:
+          type: string
+        role:
+          type: string
+          enum: [admin, coordinator, enseignant, viewer]
+        password:
+          type: string
+        enseignant_id:
+          type: ["integer", "null"]
+
+    UserUpdate:
+      type: object
+      properties:
+        nom_complet:
+          type: string
+        role:
+          type: string
+          enum: [admin, coordinator, enseignant, viewer]
+        enseignant_id:
+          type: ["integer", "null"]
+        actif:
+          type: boolean
+
+    # ─── PARTICIPANTS ─────────────────────────────────────────────────
+    Participant:
+      type: object
+      required: [id, id_participant, numero_ordre, nom_prenoms, sexe]
+      properties:
+        id:
+          type: integer
+        id_participant:
+          type: string
+        numero_ordre:
+          type: integer
+        nom_prenoms:
+          type: string
+        sexe:
+          type: string
+          enum: ["M", "F"]
+        date_naissance:
+          type: ["string", "null"]
+          format: date
+        age_decimal:
+          type: ["number", "null"]
+        age_annees:
+          type: ["integer", "null"]
+        age_clair:
+          type: ["string", "null"]
+        programme:
+          type: ["string", "null"]
+          enum: ["CDSP", "Survie", null]
+        tranche_age:
+          type: ["string", "null"]
+        electrophorese:
+          type: ["string", "null"]
+        groupe_sanguin:
+          type: ["string", "null"]
+        village:
+          type: ["string", "null"]
+        quartier:
+          type: ["string", "null"]
+        contact_participant:
+          type: ["string", "null"]
+        date_depart_prevue:
+          type: ["string", "null"]
+        annees_restantes:
+          type: ["integer", "null"]
+        enseignant:
+          oneOf:
+            - $ref: "#/components/schemas/EnseignantRef"
+            - type: "null"
+        etablissement:
+          oneOf:
+            - $ref: "#/components/schemas/EtablissementRef"
+            - type: "null"
+        created_at:
+          type: string
+
+    ParticipantList:
+      type: object
+      required: [items, total, page, page_size]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Participant"
+        total:
+          type: integer
+        page:
+          type: integer
+        page_size:
+          type: integer
+
+    ParticipantDetail:
+      allOf:
+        - $ref: "#/components/schemas/Participant"
+        - type: object
+          properties:
+            eglise_participant:
+              type: ["string", "null"]
+            date_bapteme:
+              type: ["string", "null"]
+            classe:
+              type: ["string", "null"]
+            vit_chez:
+              type: ["string", "null"]
+            contact_tuteur:
+              type: ["string", "null"]
+            religion_tuteur:
+              type: ["string", "null"]
+            situation_familiale:
+              type: ["string", "null"]
+            pere_vivant:
+              type: ["boolean", "null"]
+            mere_vivante:
+              type: ["boolean", "null"]
+            date_depart_effective:
+              type: ["string", "null"]
+            transfert:
+              type: ["string", "null"]
+            imc_recents:
+              type: array
+              items:
+                $ref: "#/components/schemas/ImcMesure"
+            presences_recentes:
+              type: array
+              items:
+                $ref: "#/components/schemas/PresenceResume"
+
+    ParticipantInput:
+      type: object
+      required: [nom_prenoms, sexe]
+      properties:
+        nom_prenoms:
+          type: string
+          minLength: 1
+        sexe:
+          type: string
+          enum: ["M", "F"]
+        date_naissance:
+          type: ["string", "null"]
+          format: date
+        electrophorese:
+          type: ["string", "null"]
+          enum: ["AA", "AC", "AS", "SC", "SS", null]
+        groupe_sanguin:
+          type: ["string", "null"]
+          enum: ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-", null]
+        village:
+          type: ["string", "null"]
+        quartier:
+          type: ["string", "null"]
+        contact_participant:
+          type: ["string", "null"]
+        eglise_participant:
+          type: ["string", "null"]
+        date_bapteme:
+          type: ["string", "null"]
+          format: date
+        classe:
+          type: ["string", "null"]
+        vit_chez:
+          type: ["string", "null"]
+        contact_tuteur:
+          type: ["string", "null"]
+        religion_tuteur:
+          type: ["string", "null"]
+        situation_familiale:
+          type: ["string", "null"]
+        pere_vivant:
+          type: ["boolean", "null"]
+        mere_vivante:
+          type: ["boolean", "null"]
+        date_depart_effective:
+          type: ["string", "null"]
+          format: date
+        transfert:
+          type: ["string", "null"]
+
+    EnseignantRef:
+      type: object
+      required: [id, nom]
+      properties:
+        id:
+          type: integer
+        nom:
+          type: string
+        classe:
+          type: ["string", "null"]
+
+    EtablissementRef:
+      type: object
+      required: [id, nom]
+      properties:
+        id:
+          type: integer
+        nom:
+          type: string
+
+    PresenceResume:
+      type: object
+      required: [date_session, statut]
+      properties:
+        date_session:
+          type: string
+        statut:
+          type: string
+          enum: ["P", "A"]
+        enseignant_nom:
+          type: ["string", "null"]
+
+    # ─── ENSEIGNANTS ─────────────────────────────────────────────────
+    Enseignant:
+      type: object
+      required: [id, nom]
+      properties:
+        id:
+          type: integer
+        nom:
+          type: string
+        classe:
+          type: ["string", "null"]
+        actif:
+          type: boolean
+        nb_eleves:
+          type: integer
+        created_at:
+          type: string
+
+    EnseignantDetail:
+      allOf:
+        - $ref: "#/components/schemas/Enseignant"
+        - type: object
+          properties:
+            eleves:
+              type: array
+              items:
+                $ref: "#/components/schemas/Participant"
+            sessions_recentes:
+              type: array
+              items:
+                $ref: "#/components/schemas/PresenceSession"
+
+    EnseignantInput:
+      type: object
+      required: [nom]
+      properties:
+        nom:
+          type: string
+          minLength: 1
+        classe:
+          type: ["string", "null"]
+        actif:
+          type: boolean
+
+    # ─── ÉTABLISSEMENTS ───────────────────────────────────────────────
+    Etablissement:
+      type: object
+      required: [id, nom]
+      properties:
+        id:
+          type: integer
+        nom:
+          type: string
+        adresse:
+          type: ["string", "null"]
+        contact:
+          type: ["string", "null"]
+        actif:
+          type: boolean
+        nb_eleves:
+          type: integer
+        created_at:
+          type: string
+
+    EtablissementDetail:
+      allOf:
+        - $ref: "#/components/schemas/Etablissement"
+        - type: object
+          properties:
+            eleves:
+              type: array
+              items:
+                $ref: "#/components/schemas/Participant"
+
+    EtablissementInput:
+      type: object
+      required: [nom]
+      properties:
+        nom:
+          type: string
+          minLength: 1
+        adresse:
+          type: ["string", "null"]
+        contact:
+          type: ["string", "null"]
+        actif:
+          type: boolean
+
+    # ─── AFFECTATIONS ─────────────────────────────────────────────────
+    AffectationEnseignantInput:
+      type: object
+      required: [eleve_id, enseignant_id]
+      properties:
+        eleve_id:
+          type: integer
+        enseignant_id:
+          type: integer
+
+    AffectationEnseignant:
+      type: object
+      required: [id, eleve_id, enseignant_id, date_affectation]
+      properties:
+        id:
+          type: integer
+        eleve_id:
+          type: integer
+        enseignant_id:
+          type: integer
+        date_affectation:
+          type: string
+
+    AffectationEtablissementInput:
+      type: object
+      required: [eleve_id, etablissement_id]
+      properties:
+        eleve_id:
+          type: integer
+        etablissement_id:
+          type: integer
+        annee_scolaire:
+          type: ["string", "null"]
+        classe:
+          type: ["string", "null"]
+
+    AffectationEtablissement:
+      type: object
+      required: [id, eleve_id, etablissement_id, date_inscription]
+      properties:
+        id:
+          type: integer
+        eleve_id:
+          type: integer
+        etablissement_id:
+          type: integer
+        annee_scolaire:
+          type: ["string", "null"]
+        classe:
+          type: ["string", "null"]
+        date_inscription:
+          type: string
+
+    # ─── PRÉSENCES ────────────────────────────────────────────────────
+    PresenceSession:
+      type: object
+      required: [id, enseignant_id, date_session]
+      properties:
+        id:
+          type: integer
+        enseignant_id:
+          type: integer
+        enseignant_nom:
+          type: ["string", "null"]
+        date_session:
+          type: string
+          format: date
+        note:
+          type: ["string", "null"]
+        nb_presents:
+          type: integer
+        nb_absents:
+          type: integer
+        created_at:
+          type: string
+
+    PresenceSessionDetail:
+      allOf:
+        - $ref: "#/components/schemas/PresenceSession"
+        - type: object
+          properties:
+            presences:
+              type: array
+              items:
+                $ref: "#/components/schemas/PresenceEntry"
+
+    SessionInput:
+      type: object
+      required: [enseignant_id, date_session]
+      properties:
+        enseignant_id:
+          type: integer
+        date_session:
+          type: string
+          format: date
+        note:
+          type: ["string", "null"]
+
+    PresenceEntry:
+      type: object
+      required: [id, eleve_id, statut]
+      properties:
+        id:
+          type: integer
+        eleve_id:
+          type: integer
+        eleve_nom:
+          type: string
+        statut:
+          type: string
+          enum: ["P", "A"]
+        motif:
+          type: ["string", "null"]
+
+    PresenceItemInput:
+      type: object
+      required: [eleve_id, statut]
+      properties:
+        eleve_id:
+          type: integer
+        statut:
+          type: string
+          enum: ["P", "A"]
+        motif:
+          type: ["string", "null"]
+
+    PresenceBatchInput:
+      type: object
+      required: [session_id, presences]
+      properties:
+        session_id:
+          type: integer
+        presences:
+          type: array
+          items:
+            $ref: "#/components/schemas/PresenceItemInput"
+
+    PresenceBatchResult:
+      type: object
+      required: [saved, alertes_creees]
+      properties:
+        saved:
+          type: integer
+        alertes_creees:
+          type: integer
+
+    AlerteAbsence:
+      type: object
+      required: [id, eleve_id, enseignant_id, nb_absences, date_detection, resolue]
+      properties:
+        id:
+          type: integer
+        eleve_id:
+          type: integer
+        eleve_nom:
+          type: string
+        enseignant_id:
+          type: integer
+        enseignant_nom:
+          type: string
+        nb_absences:
+          type: integer
+        date_detection:
+          type: string
+        resolue:
+          type: boolean
+
+    AlerteResolveInput:
+      type: object
+      required: [resolue]
+      properties:
+        resolue:
+          type: boolean
+
+    # ─── IMC ─────────────────────────────────────────────────────────
+    ImcMesure:
+      type: object
+      required: [id, participant_id, date_mesure, poids_kg, taille_cm, imc, classification]
+      properties:
+        id:
+          type: integer
+        participant_id:
+          type: integer
+        participant_nom:
+          type: ["string", "null"]
+        date_mesure:
+          type: string
+        poids_kg:
+          type: number
+        taille_cm:
+          type: number
+        imc:
+          type: number
+        classification:
+          type: string
+        action_recommandee:
+          type: ["string", "null"]
+        note:
+          type: ["string", "null"]
+        created_at:
+          type: string
+
+    ImcInput:
+      type: object
+      required: [participant_id, poids_kg, taille_cm]
+      properties:
+        participant_id:
+          type: integer
+        poids_kg:
+          type: number
+          minimum: 0.1
+        taille_cm:
+          type: number
+          minimum: 1
+        date_mesure:
+          type: ["string", "null"]
+          format: date
+        note:
+          type: ["string", "null"]
+
+    # ─── FICHES PAIEMENT ─────────────────────────────────────────────
+    FicheLigne:
+      type: object
+      required: [id, ordre, nom, montant]
+      properties:
+        id:
+          type: integer
+        ordre:
+          type: integer
+        nom:
+          type: string
+        contact:
+          type: ["string", "null"]
+        montant:
+          type: number
+
+    FicheLigneInput:
+      type: object
+      required: [ordre, nom, montant]
+      properties:
+        ordre:
+          type: integer
+        nom:
+          type: string
+        contact:
+          type: ["string", "null"]
+        montant:
+          type: number
+
+    FichePaiement:
+      type: object
+      required: [id, date_fiche, total_montant, statut]
+      properties:
+        id:
+          type: integer
+        numero:
+          type: ["string", "null"]
+        date_fiche:
+          type: string
+        motivations:
+          type: ["string", "null"]
+        total_montant:
+          type: number
+        prepare_par:
+          type: ["string", "null"]
+        valide_par:
+          type: ["string", "null"]
+        statut:
+          type: string
+          enum: [brouillon, validee, imprimee, archivee]
+        created_at:
+          type: string
+
+    FichePaiementDetail:
+      allOf:
+        - $ref: "#/components/schemas/FichePaiement"
+        - type: object
+          properties:
+            lignes:
+              type: array
+              items:
+                $ref: "#/components/schemas/FicheLigne"
+
+    FichePaiementInput:
+      type: object
+      required: [date_fiche]
+      properties:
+        date_fiche:
+          type: string
+          format: date
+        motivations:
+          type: ["string", "null"]
+        prepare_par:
+          type: ["string", "null"]
+        valide_par:
+          type: ["string", "null"]
+        statut:
+          type: string
+          enum: [brouillon, validee, imprimee, archivee]
+        lignes:
+          type: array
+          items:
+            $ref: "#/components/schemas/FicheLigneInput"
+
+    # ─── DASHBOARD ────────────────────────────────────────────────────
+    TrancheStat:
+      type: object
+      required: [tranche, nb]
+      properties:
+        tranche:
+          type: string
+        nb:
+          type: integer
+
+    AlerteInfo:
+      type: object
+      required: [eleve, enseignant, nb_absences]
+      properties:
+        eleve:
+          type: string
+        enseignant:
+          type: string
+        nb_absences:
+          type: integer
+
+    AgeExtremeInfo:
+      type: object
+      required: [valeur, participant]
+      properties:
+        valeur:
+          type: number
+        participant:
+          type: string
+
+    Dashboard:
+      type: object
+      required: [total_participants, tranches_age, sexe, programme, electrophorese, groupage]
+      properties:
+        total_participants:
+          type: integer
+        tranches_age:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrancheStat"
+        sexe:
+          type: object
+          additionalProperties:
+            type: integer
+        programme:
+          type: object
+          additionalProperties:
+            type: integer
+        electrophorese:
+          type: object
+          additionalProperties:
+            type: integer
+        groupage:
+          type: object
+          additionalProperties:
+            type: integer
+        age_max:
+          oneOf:
+            - $ref: "#/components/schemas/AgeExtremeInfo"
+            - type: "null"
+        age_min:
+          oneOf:
+            - $ref: "#/components/schemas/AgeExtremeInfo"
+            - type: "null"
+        alertes_absences:
+          type: array
+          items:
+            $ref: "#/components/schemas/AlerteInfo"
+        nb_alertes_non_resolues:
+          type: integer
+
+    # ─── RÉFÉRENTIELS ─────────────────────────────────────────────────
+    Referentiel:
+      type: object
+      required: [id, type, valeur, ordre, actif]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        valeur:
+          type: string
+        ordre:
+          type: integer
+        actif:
+          type: boolean
+
+    ReferentielInput:
+      type: object
+      required: [type, valeur]
+      properties:
+        type:
+          type: string
+        valeur:
+          type: string
+        ordre:
+          type: integer
+        actif:
+          type: boolean
