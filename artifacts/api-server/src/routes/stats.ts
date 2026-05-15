@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { db, participantsTable, alertesAbsencesTable, enseignantsTable, transactionsTable, vaccinationsTable } from "@workspace/db";
-import { eq, and, sql, desc, lt, gte, lte, isNull, not, inArray } from "drizzle-orm";
+import { db, participantsTable, alertesAbsencesTable, enseignantsTable, transactionsTable, vaccinationsTable, presenceSessionsTable, presencesTable } from "@workspace/db";
+import { eq, and, sql, desc, lt, gte, lte, isNull, not, inArray, between, count, avg } from "drizzle-orm";
 
 const router = Router();
 
@@ -181,6 +181,123 @@ router.get("/stats/depart-imminent", async (_req, res): Promise<void> => {
       created_at: p.createdAt.toISOString(),
     };
   }));
+});
+
+const MOIS_FR = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+
+router.get("/stats/rapport-mensuel", async (req, res): Promise<void> => {
+  const now = new Date();
+  const year = parseInt(String(req.query.year)) || now.getFullYear();
+  const month = parseInt(String(req.query.month)) || (now.getMonth() + 1);
+
+  const firstDay = `${year}-${String(month).padStart(2,"0")}-01`;
+  const lastDayDate = new Date(year, month, 0);
+  const lastDay = `${year}-${String(month).padStart(2,"0")}-${String(lastDayDate.getDate()).padStart(2,"0")}`;
+
+  const [sessions, nouveaux, transactions, alertesNonResolues, vaccins] = await Promise.all([
+    db.select({
+      id: presenceSessionsTable.id,
+      dateSession: presenceSessionsTable.dateSession,
+    }).from(presenceSessionsTable)
+      .where(between(presenceSessionsTable.dateSession, firstDay, lastDay)),
+
+    db.select({ id: participantsTable.id, nomPrenoms: participantsTable.nomPrenoms })
+      .from(participantsTable)
+      .where(between(
+        sql`date(${participantsTable.createdAt})`,
+        sql`${firstDay}::date`,
+        sql`${lastDay}::date`
+      )),
+
+    db.select({
+      type: transactionsTable.type,
+      total: sql<string>`cast(sum(${transactionsTable.montant}) as numeric(14,2))`,
+      nb: count(),
+    }).from(transactionsTable)
+      .where(between(transactionsTable.date, firstDay, lastDay))
+      .groupBy(transactionsTable.type),
+
+    db.select({ nb: count() }).from(alertesAbsencesTable)
+      .where(eq(alertesAbsencesTable.resolue, false)),
+
+    db.select({ nb: count() }).from(vaccinationsTable)
+      .where(
+        and(
+          not(isNull(vaccinationsTable.dateProchainesDose)),
+          lte(vaccinationsTable.dateProchainesDose, lastDay)
+        )
+      ),
+  ]);
+
+  const sessionIds = sessions.map(s => s.id);
+  let presenceStats: { total_presents: number; total_absents: number; taux_moyen: number } = {
+    total_presents: 0,
+    total_absents: 0,
+    taux_moyen: 0,
+  };
+
+  if (sessionIds.length > 0) {
+    const rows = await db.select({
+      statut: presencesTable.statut,
+      nb: count(),
+    }).from(presencesTable)
+      .where(inArray(presencesTable.sessionId, sessionIds))
+      .groupBy(presencesTable.statut);
+
+    let presents = 0, absents = 0;
+    for (const r of rows) {
+      if (r.statut === "P") presents += Number(r.nb);
+      else absents += Number(r.nb);
+    }
+    const total = presents + absents;
+    presenceStats = {
+      total_presents: presents,
+      total_absents: absents,
+      taux_moyen: total > 0 ? Math.round((presents / total) * 100) : 0,
+    };
+  }
+
+  const recettes = transactions.find(t => t.type === "recette");
+  const depenses = transactions.find(t => t.type === "depense");
+  const recettesMontant = recettes ? parseFloat(recettes.total ?? "0") : 0;
+  const depensesMontant = depenses ? parseFloat(depenses.total ?? "0") : 0;
+
+  const [allParticipants] = await Promise.all([
+    db.select({ id: participantsTable.id, statut: participantsTable.statut }).from(participantsTable),
+  ]);
+  const actifs = allParticipants.filter(p => (p.statut || "actif") === "actif").length;
+
+  res.json({
+    periode: {
+      year,
+      month,
+      label: `${MOIS_FR[month - 1]} ${year}`,
+      firstDay,
+      lastDay,
+    },
+    presences: {
+      nb_sessions: sessions.length,
+      total_presents: presenceStats.total_presents,
+      total_absents: presenceStats.total_absents,
+      taux_moyen: presenceStats.taux_moyen,
+    },
+    participants: {
+      total: allParticipants.length,
+      actifs,
+      nouveaux: nouveaux.length,
+      nouveaux_liste: nouveaux.map(p => p.nomPrenoms),
+    },
+    finances: {
+      recettes: recettesMontant,
+      depenses: depensesMontant,
+      solde: recettesMontant - depensesMontant,
+      nb_transactions: (recettes ? Number(recettes.nb) : 0) + (depenses ? Number(depenses.nb) : 0),
+    },
+    alertes: {
+      absences_non_resolues: Number(alertesNonResolues[0]?.nb ?? 0),
+      vaccins_en_retard: Number(vaccins[0]?.nb ?? 0),
+    },
+  });
 });
 
 export default router;
