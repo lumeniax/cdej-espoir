@@ -24,11 +24,14 @@ import {
   Sun,
   User,
   BarChart2,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLogout } from "@workspace/api-client-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/apiClient";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { GlobalSearch } from "../GlobalSearch";
 
@@ -41,6 +44,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [location] = useLocation();
   const { user, logout: clearAuth, isAuthenticated } = useAuth();
   const { theme, setTheme } = useTheme();
+  const isOnline = useOnlineStatus();
   const logoutMutation = useLogout();
 
   const { data: notifData } = useQuery<NotificationsResponse>({
@@ -141,12 +145,18 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="w-64 bg-sidebar text-sidebar-foreground flex flex-col flex-shrink-0 border-r border-sidebar-border">
-      <div className="h-16 flex items-center px-6 border-b border-sidebar-border">
+      <div className="h-16 flex items-center justify-between px-6 border-b border-sidebar-border">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded bg-primary flex items-center justify-center font-bold text-primary-foreground text-sm">
             E
           </div>
           <span className="font-semibold text-lg tracking-tight">CDEJ Espoir</span>
+        </div>
+        <div className={cn(
+          "flex items-center justify-center w-6 h-6 rounded-full",
+          isOnline ? "text-green-500 bg-green-500/10" : "text-red-500 bg-red-500/10"
+        )} title={isOnline ? "En ligne" : "Hors-ligne"}>
+          {isOnline ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
         </div>
       </div>
 

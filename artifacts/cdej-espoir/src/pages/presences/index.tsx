@@ -40,7 +40,7 @@ export default function Presences() {
     if (isOnline && pendingCount > 0) {
       handleSync();
     }
-  }, [isOnline]);
+  }, [isOnline, pendingCount]);
 
   async function handleSync() {
     const { synced, errors } = await syncPendingPresences();
@@ -68,6 +68,10 @@ export default function Presences() {
 
   async function handleStartSession() {
     if (!selEnseignant || !dateSession) return;
+    if (!isOnline) {
+      toast({ title: "Connexion requise", description: "La création d'une nouvelle session nécessite une connexion internet.", variant: "destructive" });
+      return;
+    }
     createSession.mutate({ data: { enseignant_id: Number(selEnseignant), date_session: dateSession } as Parameters<typeof createSession.mutate>[0]["data"] }, {
       onSuccess: (session: unknown) => {
         const s = session as { id: number; presences?: PresenceEntry[] };

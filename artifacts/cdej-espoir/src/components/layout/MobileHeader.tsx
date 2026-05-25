@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { Menu } from "lucide-react";
+import { Menu, Wifi, WifiOff } from "lucide-react";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import { cn } from "@/lib/utils";
 import { Sidebar } from "./Sidebar";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 export function MobileHeader() {
   const [open, setOpen] = useState(false);
+  const isOnline = useOnlineStatus();
   return (
     <>
       <header className="md:hidden flex items-center justify-between px-4 py-3 bg-sidebar border-b border-sidebar-border sticky top-0 z-40">
@@ -19,14 +22,23 @@ export function MobileHeader() {
             <span className="text-sidebar-foreground/60 text-xs ml-1">TG0154</span>
           </div>
         </div>
-        <button
-          onClick={() => setOpen(true)}
-          className="p-2 rounded-md text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
-          data-testid="button-mobile-menu"
-          aria-label="Ouvrir le menu"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <div className={cn(
+            "flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium",
+            isOnline ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"
+          )}>
+            {isOnline ? <Wifi className="h-3.5 w-3.5" /> : <WifiOff className="h-3.5 w-3.5" />}
+            <span className="hidden xs:inline">{isOnline ? "En ligne" : "Hors-ligne"}</span>
+          </div>
+          <button
+            onClick={() => setOpen(true)}
+            className="p-2 rounded-md text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+            data-testid="button-mobile-menu"
+            aria-label="Ouvrir le menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        </div>
       </header>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="left" className="p-0 w-72 bg-sidebar border-sidebar-border">
